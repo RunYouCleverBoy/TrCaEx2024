@@ -1,9 +1,7 @@
 package com.playgrounds.sitescraper.repos.processors
 
 import com.playgrounds.sitescraper.models.MatchedParagraph
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
-
+import org.junit.Assert.assertArrayEquals
 import org.junit.Test
 
 class WordSplitterTextProcessorImplTest {

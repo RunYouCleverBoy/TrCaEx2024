@@ -1,6 +1,5 @@
 package com.playgrounds.sitescraper.repos.processors
 
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Test
 
