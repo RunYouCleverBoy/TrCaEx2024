@@ -6,8 +6,7 @@ class HtmlParser {
 
     fun filterTheParagraphs(html: String, separator: String): String {
         val regexFinds = htmlFilterRegexFinder(html)
-        val result = regexFinds.map { it.value }.joinToString(separator)
-        return result
+        return regexFinds.map { it.value }.joinToString(separator)
     }
 
     fun extractParagraphs(html: String): List<MatchedParagraph> {

@@ -10,36 +10,43 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-class HtmlRepository @Inject constructor(
-    private val pageProvider: PageProvider,
-    private val processEngines: TextProcessors,
-) {
-
-    private val _stateFlow: MutableStateFlow<ResultsModel> = MutableStateFlow(ResultsModel("", listOf(), listOf()))
-    val stateFlow: StateFlow<ResultsModel> = _stateFlow
-
+interface HtmlRepository {
     data class LoadJob<T>(
         val url: String,
         val textProcessor: TextProcessor<T>,
         val onDone: (List<T>) -> Unit
     )
 
-    fun getLoadJobs(configuration: LoadConfiguration) = listOf(
-        LoadJob(
+    val stateFlow: StateFlow<ResultsModel>
+    fun getLoadJobs(configuration: LoadConfiguration): List<LoadJob<out Any>>
+    suspend fun <T> refresh(loadJob: LoadJob<T>): Result<String>
+}
+
+class HtmlRepositoryImpl @Inject constructor(
+    private val pageProvider: PageProvider,
+    private val processEngines: TextProcessors,
+): HtmlRepository {
+
+    private val _stateFlow: MutableStateFlow<ResultsModel> =
+        MutableStateFlow(ResultsModel("", listOf(), listOf()))
+    override val stateFlow: StateFlow<ResultsModel> = _stateFlow
+
+    override fun getLoadJobs(configuration: LoadConfiguration) = listOf(
+        HtmlRepository.LoadJob(
             configuration.singleTaskConfiguration.url,
             processEngines.singleChar
         ) { data -> _stateFlow.update { it.copy(singleChar = data.firstOrNull() ?: "") } },
-        LoadJob(
+        HtmlRepository.LoadJob(
             configuration.periodicTaskConfiguration.url,
             processEngines.periodicChar
         ) { data -> _stateFlow.update { it.copy(periodicChar = data) } },
-        LoadJob(
+        HtmlRepository.LoadJob(
             configuration.wordSplitTaskConfiguration.url,
             processEngines.wordSplitter
         ) { data -> _stateFlow.update { it.copy(wordSplitter = data) } }
     )
 
-    suspend fun <T> refresh(loadJob: LoadJob<T>): Result<String> {
+    override suspend fun <T> refresh(loadJob: HtmlRepository.LoadJob<T>): Result<String> {
         val result = pageProvider.getPage(loadJob.url)
         if (result.isSuccess) {
             val data = loadJob.textProcessor.processText(result.getOrThrow())

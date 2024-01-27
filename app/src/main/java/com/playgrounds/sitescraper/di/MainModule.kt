@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.res.AssetManager
 import com.playgrounds.sitescraper.models.LoadConfiguration
 import com.playgrounds.sitescraper.models.TaskConfiguration
+import com.playgrounds.sitescraper.repos.HtmlRepository
+import com.playgrounds.sitescraper.repos.HtmlRepositoryImpl
 import com.playgrounds.sitescraper.repos.processors.PeriodicCharTextProcessorImpl
 import com.playgrounds.sitescraper.repos.processors.SingleCharTextProcessorImpl
 import com.playgrounds.sitescraper.repos.processors.TextProcessors
@@ -33,6 +35,14 @@ class MainModule {
     @Provides
     fun provideWebPageProvider(httpClient: HttpClient): PageProvider {
         return WebPageProviderImpl(httpClient)
+    }
+
+    @Provides
+    fun provideHtmlRepository(
+        pageProvider: PageProvider,
+        textProcessors: TextProcessors
+    ): HtmlRepository {
+        return HtmlRepositoryImpl(pageProvider, textProcessors)
     }
 
     @Provides
