@@ -8,12 +8,22 @@ class WordSplitterTextProcessorImplTest {
 
     @Test
     fun processText() {
-        val filtered = WordSplitterTextProcessorImpl()
-            .processText("<p>ABCDEF GHI</p><p>JKL</p>")
+        val filtered = WordSplitterTextProcessorImpl().processText("<p>ABCDEF GHI</p><p>JKL</p>")
         assertArrayEquals(
             arrayOf(
                 MatchedParagraph("<p>", "ABCDEF GHI", "</p>"),
-                MatchedParagraph("<p>", "JKM", "</p>")
+                MatchedParagraph("<p>", "JKL", "</p>")
+            ),
+            filtered.toTypedArray()
+        )
+    }
+
+    @Test
+    fun processTextWithJunk() {
+        val filtered = WordSplitterTextProcessorImpl().processText("<junk>aaa</junk><p>JKL</p><moreJunk>bbb</moreJunk>")
+        assertArrayEquals(
+            arrayOf(
+                MatchedParagraph("<p>", "JKL", "</p>")
             ),
             filtered.toTypedArray()
         )

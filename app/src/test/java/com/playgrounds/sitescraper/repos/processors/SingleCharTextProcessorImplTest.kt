@@ -8,7 +8,7 @@ class SingleCharTextProcessorImplTest {
 
     @Test
     fun processTextSimple() {
-        val singleCharTextProcessorImpl = SingleCharTextProcessorImpl(1)
+        val singleCharTextProcessorImpl = SingleCharTextProcessorImpl(4)
         assertArrayEquals(
             arrayOf("1"),
             singleCharTextProcessorImpl.processText("<p>123456789</p>").toTypedArray()

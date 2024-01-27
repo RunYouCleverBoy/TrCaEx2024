@@ -5,19 +5,21 @@ import com.playgrounds.sitescraper.models.MatchedParagraph
 class HtmlParser {
 
     fun filterTheParagraphs(html: String, separator: String): String {
-        val regex = Regex("(<p>)(.*?)(</p>)")
-        val result = regex.findAll(html).map {
-            it.groupValues[2]
-        }.joinToString(separator)
+        val regexFinds = htmlFilterRegexFinder(html)
+        val result = regexFinds.map { it.value }.joinToString(separator)
         return result
     }
 
     fun extractParagraphs(html: String): List<MatchedParagraph> {
-        val regex = Regex("(<p>)(.*?)(</p>)")
-        val result = regex.findAll(html).map {
+        val regexFinds = htmlFilterRegexFinder(html)
+        val result = regexFinds.map {
             MatchedParagraph(it.groupValues[1], it.groupValues[2], it.groupValues[3])
         }
         return result.toList()
+    }
+
+    fun htmlFilterRegexFinder(html: String): Sequence<MatchResult> {
+        return Regex("(<p>)([^<>]*?)(</p>)").findAll(html)
     }
 
 
