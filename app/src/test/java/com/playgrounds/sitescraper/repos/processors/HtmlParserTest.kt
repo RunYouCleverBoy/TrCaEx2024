@@ -54,7 +54,9 @@ class HtmlParserTest {
         )
 
         result =
-            htmlParser.extractParagraphs("<q>Some junk</q><p>First paragraph</p><p>Second paragraph</p><q>SomeJunk</q>")
+            htmlParser.extractParagraphs(
+                "<q>Some junk</q><p>First paragraph</p>" +
+                        "<p>Second paragraph</p><q>SomeJunk</q>")
                 .toTypedArray()
         assertArrayEquals(
             arrayOf(
