@@ -1,6 +1,7 @@
 package com.playgrounds.sitescraper
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -12,6 +13,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -19,6 +21,7 @@ import androidx.compose.ui.Modifier
 import com.playgrounds.sitescraper.ui.components.TopBar
 import com.playgrounds.sitescraper.ui.screens.main.MainScreen
 import com.playgrounds.sitescraper.ui.screens.main.MainViewModel
+import com.playgrounds.sitescraper.ui.screens.main.models.MainAction
 import com.playgrounds.sitescraper.ui.screens.main.models.MainEvent
 import com.playgrounds.sitescraper.ui.theme.SiteScraperTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,6 +33,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             val viewModel by viewModels<MainViewModel>()
             val state by viewModel.stateFlow.collectAsState()
+            LaunchedEffect(Unit) {
+                viewModel.actionFlow.collect { action ->
+                    when (action) {
+                        is MainAction.Error -> Toast.makeText(this@MainActivity, action.message, Toast.LENGTH_LONG)
+                            .show()
+                    }
+                }
+            }
             SiteScraperTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(

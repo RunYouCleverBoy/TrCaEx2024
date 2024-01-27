@@ -22,6 +22,10 @@ class MainViewModel @Inject constructor(
     private val loadConfiguration: LoadConfiguration,
 ) : MVIViewModel<MainState, MainEvent, MainAction>(MainState()) {
 
+    private val errorHandler = CoroutineExceptionHandler { _, throwable ->
+        errorHandler(throwable)
+    }
+
     init {
         viewModelScope.launch {
             dispatchEvent(MainEvent.ReloadPressed)
@@ -50,12 +54,10 @@ class MainViewModel @Inject constructor(
 
     private fun onReloadPressed() {
         _stateFlow.update { it.copy(isLoading = true) }
-        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
-            errorHandler(throwable)
-        }) {
+        viewModelScope.launch {
             val loadJobs = htmlRepository.getLoadJobs(loadConfiguration)
             val jobs = loadJobs.map { loadJob ->
-                launch(Dispatchers.IO) {
+                launch(Dispatchers.IO + errorHandler) {
                     htmlRepository.refresh(loadJob)
                 }
             }
@@ -66,6 +68,7 @@ class MainViewModel @Inject constructor(
 
     private fun errorHandler(throwable: Throwable) {
         Log.w(TAG, "errorHandler: ", throwable)
+        emit(MainAction.Error(throwable.message ?: "Unknown error"))
     }
 
     companion object {
