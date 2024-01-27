@@ -5,7 +5,6 @@ import com.playgrounds.sitescraper.models.MatchedParagraph
 import com.playgrounds.sitescraper.models.TaskConfiguration
 import com.playgrounds.sitescraper.repos.processors.PeriodicCharTextProcessor
 import com.playgrounds.sitescraper.repos.processors.SingleCharTextProcessor
-import com.playgrounds.sitescraper.repos.processors.TextProcessor
 import com.playgrounds.sitescraper.repos.processors.TextProcessors
 import com.playgrounds.sitescraper.repos.processors.WordSplitterTextProcessor
 import com.playgrounds.sitescraper.repos.providers.PageProvider
@@ -13,7 +12,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
-
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

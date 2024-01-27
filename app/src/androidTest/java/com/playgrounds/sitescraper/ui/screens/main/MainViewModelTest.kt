@@ -2,14 +2,10 @@ package com.playgrounds.sitescraper.ui.screens.main
 
 import com.playgrounds.sitescraper.models.LoadConfiguration
 import com.playgrounds.sitescraper.models.MatchedParagraph
-import com.playgrounds.sitescraper.models.ResultsModel
 import com.playgrounds.sitescraper.models.TaskConfiguration
-import com.playgrounds.sitescraper.repos.HtmlRepository
 import com.playgrounds.sitescraper.repos.HtmlRepositoryImpl
 import com.playgrounds.sitescraper.repos.processors.PeriodicCharTextProcessorImpl
-import com.playgrounds.sitescraper.repos.processors.SingleCharTextProcessor
 import com.playgrounds.sitescraper.repos.processors.SingleCharTextProcessorImpl
-import com.playgrounds.sitescraper.repos.processors.TextProcessor
 import com.playgrounds.sitescraper.repos.processors.TextProcessors
 import com.playgrounds.sitescraper.repos.processors.WordSplitterTextProcessorImpl
 import com.playgrounds.sitescraper.repos.providers.PageProvider
@@ -17,8 +13,6 @@ import com.playgrounds.sitescraper.ui.screens.main.models.MainEvent
 import com.playgrounds.sitescraper.ui.screens.main.models.MainState
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
