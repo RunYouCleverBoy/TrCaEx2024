@@ -88,7 +88,7 @@ class HtmlRepositoryTest {
     }
     private class MockWordSplitterProcessor(val id: Int) : WordSplitterTextProcessor {
         override fun processText(text: String): List<MatchedParagraph> {
-            return text.split("|").mapIndexed { index, s -> MatchedParagraph("A", s, "-A") }
+            return text.split("|").mapIndexed { _, s -> MatchedParagraph("A", s, "-A") }
         }
     }
 }
