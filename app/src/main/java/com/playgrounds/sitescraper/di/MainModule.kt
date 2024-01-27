@@ -2,15 +2,14 @@ package com.playgrounds.sitescraper.di
 
 import android.content.Context
 import android.content.res.AssetManager
+import com.playgrounds.sitescraper.models.LoadConfiguration
+import com.playgrounds.sitescraper.models.TaskConfiguration
 import com.playgrounds.sitescraper.repos.processors.PeriodicCharTextProcessorImpl
 import com.playgrounds.sitescraper.repos.processors.SingleCharTextProcessorImpl
 import com.playgrounds.sitescraper.repos.processors.TextProcessors
 import com.playgrounds.sitescraper.repos.processors.WordSplitterTextProcessorImpl
-import com.playgrounds.sitescraper.models.LoadConfiguration
 import com.playgrounds.sitescraper.repos.providers.PageProvider
 import com.playgrounds.sitescraper.repos.providers.WebPageProviderImpl
-import com.playgrounds.sitescraper.models.TaskConfiguration
-import com.playgrounds.sitescraper.repos.providers.AssetPageProviderImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,14 +31,9 @@ class MainModule {
     }
 
     @Provides
-    fun provideAssetPageProvider(assetsManager: AssetManager): PageProvider {
-        return AssetPageProviderImpl(assetsManager)
+    fun provideWebPageProvider(httpClient: HttpClient): PageProvider {
+        return WebPageProviderImpl(httpClient)
     }
-
-//    @Provides
-//    fun provideWebPageProvider(httpClient: HttpClient): PageProvider {
-//        return WebPageProviderImpl(httpClient)
-//    }
 
     @Provides
     fun provideProcessorEngines(configuration: LoadConfiguration): TextProcessors {

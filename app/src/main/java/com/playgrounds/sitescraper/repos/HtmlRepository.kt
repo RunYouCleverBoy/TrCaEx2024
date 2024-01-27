@@ -1,10 +1,10 @@
 package com.playgrounds.sitescraper.repos
 
+import com.playgrounds.sitescraper.models.LoadConfiguration
+import com.playgrounds.sitescraper.models.ResultsModel
 import com.playgrounds.sitescraper.repos.processors.TextProcessor
 import com.playgrounds.sitescraper.repos.processors.TextProcessors
 import com.playgrounds.sitescraper.repos.providers.PageProvider
-import com.playgrounds.sitescraper.models.LoadConfiguration
-import com.playgrounds.sitescraper.models.ResultsModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -18,10 +18,10 @@ class HtmlRepository @Inject constructor(
     private val _stateFlow: MutableStateFlow<ResultsModel> = MutableStateFlow(ResultsModel("", listOf(), listOf()))
     val stateFlow: StateFlow<ResultsModel> = _stateFlow
 
-    data class LoadJob(
+    data class LoadJob<T>(
         val url: String,
-        val textProcessor: TextProcessor,
-        val onDone: (List<String>) -> Unit
+        val textProcessor: TextProcessor<T>,
+        val onDone: (List<T>) -> Unit
     )
 
     fun getLoadJobs(configuration: LoadConfiguration) = listOf(
@@ -39,11 +39,11 @@ class HtmlRepository @Inject constructor(
         ) { data -> _stateFlow.update { it.copy(wordSplitter = data) } }
     )
 
-    suspend fun refresh(loadJob: LoadJob): Result<String> {
+    suspend fun <T> refresh(loadJob: LoadJob<T>): Result<String> {
         val result = pageProvider.getPage(loadJob.url)
         if (result.isSuccess) {
-            loadJob.textProcessor.processText(result.getOrThrow())
-            loadJob.onDone
+            val data = loadJob.textProcessor.processText(result.getOrThrow())
+            loadJob.onDone(data)
         }
         return result
     }

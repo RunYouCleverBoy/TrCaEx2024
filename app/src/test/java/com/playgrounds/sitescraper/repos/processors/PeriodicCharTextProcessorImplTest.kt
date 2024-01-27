@@ -10,22 +10,19 @@ class PeriodicCharTextProcessorImplTest {
 
     @Test
     fun processText() {
-        runTest {
-            val filtered: List<String> =
-                periodicCharTextProcessorImpl.processText("<p>123456789</p>")
-            assertArrayEquals(
-                arrayOf(
-                    "p",
-                    "1",
-                    "3",
-                    "5",
-                    "7",
-                    "9",
-                    "/",
-                    ">"
-                ),
-                filtered.toTypedArray()
-            )
-        }
+        val filtered = periodicCharTextProcessorImpl.processText("<p>123456789</p>")
+        assertArrayEquals(
+            arrayOf(
+                "p",
+                "1",
+                "3",
+                "5",
+                "7",
+                "9",
+                "/",
+                ">"
+            ),
+            filtered.toTypedArray()
+        )
     }
 }

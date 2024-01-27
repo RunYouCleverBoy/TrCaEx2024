@@ -1,5 +1,6 @@
 package com.playgrounds.sitescraper.repos.processors
 
+import com.playgrounds.sitescraper.models.MatchedParagraph
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 
@@ -9,14 +10,14 @@ class WordSplitterTextProcessorImplTest {
 
     @Test
     fun processText() {
-        runTest {
-            val filtered: List<String> = WordSplitterTextProcessorImpl().processText("<p>Hey You</p>")
-            assertArrayEquals(
-                arrayOf(
-                    "123456789"
-                ),
-                filtered.toTypedArray()
-            )
-        }
+        val filtered = WordSplitterTextProcessorImpl()
+            .processText("<p>ABCDEF GHI</p><p>JKL</p>")
+        assertArrayEquals(
+            arrayOf(
+                MatchedParagraph("<p>", "ABCDEF GHI", "</p>"),
+                MatchedParagraph("<p>", "JKM", "</p>")
+            ),
+            filtered.toTypedArray()
+        )
     }
 }

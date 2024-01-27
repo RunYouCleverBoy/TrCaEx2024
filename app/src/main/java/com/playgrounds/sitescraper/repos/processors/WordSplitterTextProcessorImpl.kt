@@ -1,12 +1,9 @@
 package com.playgrounds.sitescraper.repos.processors
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.playgrounds.sitescraper.models.MatchedParagraph
 
-class WordSplitterTextProcessorImpl : TextProcessor {
-    override suspend fun processText(text: String): List<String> {
-        return withContext(Dispatchers.IO) {
-            HtmlParser().filterTheParagraphs(text, " ").split(Regex("\\s+"))
-        }
+class WordSplitterTextProcessorImpl : TextProcessor<MatchedParagraph> {
+    override fun processText(text: String): List<MatchedParagraph> {
+        return HtmlParser().extractParagraphs(text)
     }
 }

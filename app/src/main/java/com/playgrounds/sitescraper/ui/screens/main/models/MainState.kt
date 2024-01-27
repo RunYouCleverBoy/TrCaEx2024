@@ -7,6 +7,6 @@ data class MainState(
     val isLoading: Boolean = false,
     val charOfInterest: String = "",
     val charsOfPeriodicInterest: String = "",
-    val splitWords: String = ""
+    val splitWords: List<String> = emptyList(),
 )
 

@@ -1,5 +1,6 @@
 package com.playgrounds.sitescraper.repos.processors
 
+import com.playgrounds.sitescraper.models.MatchedParagraph
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -27,19 +28,23 @@ class HtmlParserTest {
 
     @Test
     fun extractTheParagraphs() {
-        runTest {
-            val html = "<p>First paragraph</p><p>Second paragraph</p>"
-            var result = htmlParser.extractParagraphs(html).toTypedArray()
-            assertArrayEquals(arrayOf(
-                HtmlParser.MatchedParagraph("<p>", "First paragraph", "</p>"),
-                HtmlParser.MatchedParagraph("<p>", "Second paragraph", "</p>")
-            ), result)
+        val html = "<p>First paragraph</p><p>Second paragraph</p>"
+        var result = htmlParser.extractParagraphs(html).toTypedArray()
+        assertArrayEquals(
+            arrayOf(
+                MatchedParagraph("<p>", "First paragraph", "</p>"),
+                MatchedParagraph("<p>", "Second paragraph", "</p>")
+            ), result
+        )
 
-            result = htmlParser.extractParagraphs("<q>Some junk</q><p>First paragraph</p><p>Second paragraph</p><q>SomeJunk</q>").toTypedArray()
-            assertArrayEquals(arrayOf(
-                HtmlParser.MatchedParagraph("<p>", "First paragraph", "</p>"),
-                HtmlParser.MatchedParagraph("<p>", "Second paragraph", "</p>")
-            ), result)
-        }
+        result =
+            htmlParser.extractParagraphs("<q>Some junk</q><p>First paragraph</p><p>Second paragraph</p><q>SomeJunk</q>")
+                .toTypedArray()
+        assertArrayEquals(
+            arrayOf(
+                MatchedParagraph("<p>", "First paragraph", "</p>"),
+                MatchedParagraph("<p>", "Second paragraph", "</p>")
+            ), result
+        )
     }
 }
