@@ -5,8 +5,8 @@ package com.playgrounds.sitescraper.ui.screens.main.models
  */
 data class MainState(
     val isLoading: Boolean = false,
-    val charOfInterest: String = "",
-    val charsOfPeriodicInterest: String = "",
-    val splitWords: List<String> = emptyList(),
+    val charOfInterest: String? = null,
+    val charsOfPeriodicInterest: String? = null,
+    val wordsCount: String? = null,
 )
 

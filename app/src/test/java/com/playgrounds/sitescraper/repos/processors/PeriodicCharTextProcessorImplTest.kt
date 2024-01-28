@@ -1,6 +1,6 @@
 package com.playgrounds.sitescraper.repos.processors
 
-import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 
@@ -9,19 +9,19 @@ class PeriodicCharTextProcessorImplTest {
 
     @Test
     fun processText() {
-        val filtered = periodicCharTextProcessorImpl.processText("<p>123456789</p>")
-        assertArrayEquals(
-            arrayOf(
-                "p",
-                "1",
-                "3",
-                "5",
-                "7",
-                "9",
-                "/",
-                ">"
-            ),
-            filtered.toTypedArray()
+        assertEquals(
+            "246",
+            periodicCharTextProcessorImpl.processText("<p>123456</p>")
+                .joinToString("") { it.toString() }
+        )
+    }
+
+    @Test
+    fun processTextWithSpaces() {
+        assertEquals(
+            "135 ",
+            periodicCharTextProcessorImpl.processText("<p> 123456 </p>")
+                .joinToString("") { it.toString() }
         )
     }
 }

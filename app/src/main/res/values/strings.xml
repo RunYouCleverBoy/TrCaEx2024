@@ -3,6 +3,6 @@
     <string name="top_bar_title">Site Scraper</string>
     <string name="char_of_interest">Char of interest</string>
     <string name="chars_of_periodic_interest">Periodic chars pick</string>
-    <string name="split_words">Split words</string>
+    <string name="word_count">Word count</string>
     <string name="refresh_button_description">Refresh</string>
 </resources>

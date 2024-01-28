@@ -1,6 +1,5 @@
 package com.playgrounds.sitescraper.repos.processors
 
-import com.playgrounds.sitescraper.models.MatchedParagraph
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -11,58 +10,51 @@ class HtmlParserTest {
 
     @Test
     fun htmlFilterRegexFinder() {
-        val testCasesWithTags: List<Pair<String, List<String>>> = listOf(
-            "<p>First paragraph</p><p>Second paragraph</p>" to listOf(
-                "<p>First paragraph</p>",
-                "<p>Second paragraph</p>"
+        val testCases = listOf(
+            "<p>First paragraph</p><p>Second paragraph</p>" shouldResultIn arrayOf(
+                HtmlParser.ParseResult("<p>", "First paragraph", "</p>"),
+                HtmlParser.ParseResult("<p>", "Second paragraph", "</p>")
             ),
-            "<q>Some junk</q><p>First paragraph</p><p>Second paragraph</p><q>SomeJunk</q>" to listOf(
-                "<p>First paragraph</p>",
-                "<p>Second paragraph</p>"
+            "<q>Some junk</q><p>First paragraph</p><p>Second paragraph</p><q>SomeJunk</q>" shouldResultIn arrayOf(
+                HtmlParser.ParseResult("<p>", "First paragraph", "</p>"),
+                HtmlParser.ParseResult("<p>", "Second paragraph", "</p>")
             ),
-            "<Junk>some junk</Junk>" to listOf(),
+            "<Junk>some junk</Junk>" shouldResultIn emptyArray(),
         )
-        testCasesWithTags.forEach { (input, expected) ->
-            val result = htmlParser.htmlFilterRegexFinder(input).map { it.value }.toList()
-            assertEquals(expected, result)
+        testCases.forEach { (input, expected) ->
+            val result = htmlParser.htmlFilterRegexFinder(input).toList().toTypedArray()
+            assertArrayEquals(expected, result)
         }
     }
 
     @Test
     fun filterTheParagraphs() {
-        val testCasesWithTags: List<Pair<String, String>> = listOf(
-            "<p>First paragraph</p><p>Second paragraph</p>" to "<p>First paragraph</p>-><p>Second paragraph</p>",
-            "<q>Some junk</q><p>First paragraph</p><p>Second paragraph</p><q>SomeJunk</q>" to "<p>First paragraph</p>-><p>Second paragraph</p>",
-            "<Junk>some junk</Junk>" to "",
+        val testCases = listOf(
+            "<p>First paragraph</p><p>Second paragraph</p>" shouldResultIn "First paragraph->Second paragraph",
+            "<q>Some junk</q><p>First paragraph</p><p>Second paragraph</p><q>SomeJunk</q>" shouldResultIn "First paragraph->Second paragraph",
+            "<Junk>some junk</Junk>" shouldResultIn "",
         )
 
-        testCasesWithTags.forEach { (input, expected) ->
+        testCases.forEach { (input, expected) ->
             val result = htmlParser.filterTheParagraphs(input, "->")
             assertEquals(expected, result)
         }
     }
 
     @Test
-    fun extractTheParagraphs() {
-        val html = "<p>First paragraph</p><p>Second paragraph</p>"
-        var result = htmlParser.extractParagraphs(html).toTypedArray()
-        assertArrayEquals(
-            arrayOf(
-                MatchedParagraph("<p>", "First paragraph", "</p>"),
-                MatchedParagraph("<p>", "Second paragraph", "</p>")
-            ), result
+    fun countTheWords() {
+        val testCases = listOf(
+            "<p>First paragraph</p><p>Second paragraph</p>" shouldResultIn 8,
+            "<m>Some junk</m><p>First paragraph</p><p>Second paragraph</p><m>SomeJunk</m>" shouldResultIn 8,
+            "<Junk>some junk</Junk>" shouldResultIn 0
         )
-
-        result =
-            htmlParser.extractParagraphs(
-                "<q>Some junk</q><p>First paragraph</p>" +
-                        "<p>Second paragraph</p><q>SomeJunk</q>")
-                .toTypedArray()
-        assertArrayEquals(
-            arrayOf(
-                MatchedParagraph("<p>", "First paragraph", "</p>"),
-                MatchedParagraph("<p>", "Second paragraph", "</p>")
-            ), result
-        )
+        testCases.forEach { (input, expected) ->
+            val result = htmlParser.countWords(input)
+            assertEquals(input, expected, result)
+        }
     }
+
+    private data class TestCase<T>(val input: String, val expected: T)
+
+    private infix fun <T> String.shouldResultIn(expected: T) = TestCase(this, expected)
 }

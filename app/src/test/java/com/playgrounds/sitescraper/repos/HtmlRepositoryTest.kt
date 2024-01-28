@@ -1,14 +1,9 @@
 package com.playgrounds.sitescraper.repos
 
-import com.playgrounds.sitescraper.models.LoadConfiguration
-import com.playgrounds.sitescraper.models.MatchedParagraph
-import com.playgrounds.sitescraper.models.TaskConfiguration
 import com.playgrounds.sitescraper.repos.processors.PeriodicCharTextProcessor
 import com.playgrounds.sitescraper.repos.processors.SingleCharTextProcessor
-import com.playgrounds.sitescraper.repos.processors.TextProcessors
-import com.playgrounds.sitescraper.repos.processors.WordSplitterTextProcessor
+import com.playgrounds.sitescraper.repos.processors.WordCounterTextProcessor
 import com.playgrounds.sitescraper.repos.providers.PageProvider
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
@@ -19,14 +14,19 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(RobolectricTestRunner::class)
-class HtmlRepositoryTest {
+class HtmlRepositoryTest() {
     private val provider: MockPageProvider = MockPageProvider()
+    private val mockSingleTextProcessor = MockSingleTextProcessor(1)
+
+    private val mockPeriodicTextProcessor = MockPeriodicTextProcessor(2)
+
+    private val mockWordCounterProcessor = MockWordCounterProcessor()
+
     private val htmlRepository = HtmlRepositoryImpl(
-        provider, TextProcessors(
-            MockSingleTextProcessor(1),
-            MockPeriodicTextProcessor(2),
-            MockWordSplitterProcessor(3)
-        )
+        provider,
+        mockSingleTextProcessor,
+        mockPeriodicTextProcessor,
+        mockWordCounterProcessor
     )
 
     @Before
@@ -35,60 +35,48 @@ class HtmlRepositoryTest {
     }
 
     @Test
-    fun getLoadJobs() {
-        val configuration = LoadConfiguration(
-            TaskConfiguration.SingleCharTask("url1", 0),
-            TaskConfiguration.PeriodicCharTask("url2", 0),
-            TaskConfiguration.WordSplitTask("url3")
-        )
-        assertEquals(htmlRepository.getLoadJobs(configuration).size, 3)
-        htmlRepository.getLoadJobs(configuration)[0].let {
-            assertEquals(it.url, "url1")
-            assertEquals(1, (it.textProcessor as? MockSingleTextProcessor)?.id)
-        }
-        htmlRepository.getLoadJobs(configuration)[1].let {
-            assertEquals(it.url, "url2")
-            assertEquals(2, (it.textProcessor as? MockPeriodicTextProcessor)?.id)
-        }
-        htmlRepository.getLoadJobs(configuration)[2].let {
-            assertEquals(it.url, "url3")
-            assertEquals(3, (it.textProcessor as? MockWordSplitterProcessor)?.id)
-        }
-    }
-
-    @Test
     fun refresh() {
         runTest {
-            val response = CompletableDeferred<List<String>>()
-            htmlRepository.refresh(HtmlRepository.LoadJob("url", MockSingleTextProcessor(1)) {
-                response.complete(it)
-            })
-            val result = response.await()
-            assertArrayEquals(provider.text.split("|").toTypedArray(), result.toTypedArray())
+            val dummyUrl = "url"
+            assertEquals(
+                mockSingleTextProcessor.processText(provider.text),
+                htmlRepository.refresh(HtmlRepository.LoadJobType.SINGLE_CHAR, dummyUrl).getOrThrow()
+            )
+            assertEquals(
+                mockPeriodicTextProcessor.processText(provider.text),
+                htmlRepository.refresh(HtmlRepository.LoadJobType.PERIODIC_CHAR, dummyUrl).getOrThrow()
+            )
+            assertEquals(
+                mockWordCounterProcessor.processText(provider.text),
+                htmlRepository.refresh(HtmlRepository.LoadJobType.WORD_COUNT, dummyUrl).getOrThrow()
+            )
         }
     }
 
     private class MockPageProvider : PageProvider {
-        var text = "One|Two|Three"
+        var text = ""
         override suspend fun getPage(url: String): Result<String> {
             delay(100.milliseconds)
             return Result.success(text)
         }
     }
 
-    private class MockSingleTextProcessor(val id: Int) : SingleCharTextProcessor {
-        override fun processText(text: String): List<String> {
-            return text.split("|")
+    private class MockSingleTextProcessor(private val index: Int) : SingleCharTextProcessor {
+        override fun processText(text: String): Char? {
+            return if (index in text.indices) text[index] else null
         }
     }
-    private class MockPeriodicTextProcessor(val id: Int) : PeriodicCharTextProcessor {
-        override fun processText(text: String): List<String> {
-            return text.split("|")
+
+    private class MockPeriodicTextProcessor(private val period: Int) : PeriodicCharTextProcessor {
+        override fun processText(text: String): List<Char> {
+            val str = text.split("|").joinToString(" ")
+            return (period-1 until str.length step period).map { str[it] }
         }
     }
-    private class MockWordSplitterProcessor(val id: Int) : WordSplitterTextProcessor {
-        override fun processText(text: String): List<MatchedParagraph> {
-            return text.split("|").mapIndexed { _, s -> MatchedParagraph("A", s, "-A") }
+
+    private class MockWordCounterProcessor : WordCounterTextProcessor {
+        override fun processText(text: String): Int {
+            return text.split("|").count()
         }
     }
 }

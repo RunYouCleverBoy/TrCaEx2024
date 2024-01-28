@@ -1,7 +1,7 @@
 package com.playgrounds.sitescraper.repos.processors
 
-import org.junit.Assert.*
-
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class SingleCharTextProcessorImplTest {
@@ -9,18 +9,15 @@ class SingleCharTextProcessorImplTest {
     @Test
     fun processTextSimple() {
         val singleCharTextProcessorImpl = SingleCharTextProcessorImpl(4)
-        assertArrayEquals(
-            arrayOf("1"),
-            singleCharTextProcessorImpl.processText("<p>123456789</p>").toTypedArray()
+        assertEquals(
+            '4',
+            singleCharTextProcessorImpl.processText("<p>123456789</p>")
         )
     }
 
     @Test
     fun processIllegalIndex() {
         val singleCharTextProcessorImpl = SingleCharTextProcessorImpl(30)
-        assertArrayEquals(
-            emptyArray<String>(),
-            singleCharTextProcessorImpl.processText("<p>123456789</p>").toTypedArray()
-        )
+        assertNull(singleCharTextProcessorImpl.processText("<p>123456789</p>"))
     }
 }

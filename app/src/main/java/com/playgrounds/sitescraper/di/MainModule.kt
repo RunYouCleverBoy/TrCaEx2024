@@ -1,22 +1,21 @@
 package com.playgrounds.sitescraper.di
 
-import android.content.Context
-import android.content.res.AssetManager
 import com.playgrounds.sitescraper.models.LoadConfiguration
 import com.playgrounds.sitescraper.models.TaskConfiguration
 import com.playgrounds.sitescraper.repos.HtmlRepository
 import com.playgrounds.sitescraper.repos.HtmlRepositoryImpl
+import com.playgrounds.sitescraper.repos.processors.PeriodicCharTextProcessor
 import com.playgrounds.sitescraper.repos.processors.PeriodicCharTextProcessorImpl
+import com.playgrounds.sitescraper.repos.processors.SingleCharTextProcessor
 import com.playgrounds.sitescraper.repos.processors.SingleCharTextProcessorImpl
-import com.playgrounds.sitescraper.repos.processors.TextProcessors
-import com.playgrounds.sitescraper.repos.processors.WordSplitterTextProcessorImpl
+import com.playgrounds.sitescraper.repos.processors.WordCounterTextProcessor
+import com.playgrounds.sitescraper.repos.processors.WordCounterTextProcessorImpl
 import com.playgrounds.sitescraper.repos.providers.PageProvider
 import com.playgrounds.sitescraper.repos.providers.WebPageProviderImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
-import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.HttpTimeout
@@ -28,11 +27,6 @@ import io.ktor.client.plugins.logging.Logging
 @InstallIn(ViewModelComponent::class)
 class MainModule {
     @Provides
-    fun provideAssetsManager(@ApplicationContext context: Context): AssetManager {
-        return context.assets
-    }
-
-    @Provides
     fun provideWebPageProvider(httpClient: HttpClient): PageProvider {
         return WebPageProviderImpl(httpClient)
     }
@@ -40,19 +34,29 @@ class MainModule {
     @Provides
     fun provideHtmlRepository(
         pageProvider: PageProvider,
-        textProcessors: TextProcessors
+        singleCharTextProcessor: SingleCharTextProcessor,
+        periodicCharTextProcessor: PeriodicCharTextProcessor,
+        wordCounterTextProcessor: WordCounterTextProcessor
     ): HtmlRepository {
-        return HtmlRepositoryImpl(pageProvider, textProcessors)
+        return HtmlRepositoryImpl(
+            pageProvider,
+            singleCharTextProcessor,
+            periodicCharTextProcessor,
+            wordCounterTextProcessor
+        )
     }
 
     @Provides
-    fun provideProcessorEngines(configuration: LoadConfiguration): TextProcessors {
-        return TextProcessors(
-            singleChar = SingleCharTextProcessorImpl(configuration.singleTaskConfiguration.index),
-            periodicChar = PeriodicCharTextProcessorImpl(configuration.periodicTaskConfiguration.index),
-            wordSplitter = WordSplitterTextProcessorImpl()
-        )
-    }
+    fun provideSingleCharTextProcessor(configuration: LoadConfiguration): SingleCharTextProcessor =
+        SingleCharTextProcessorImpl(configuration.singleTaskConfiguration.index)
+
+    @Provides
+    fun providePeriodicCharTextProcessor(configuration: LoadConfiguration): PeriodicCharTextProcessor =
+        PeriodicCharTextProcessorImpl(configuration.periodicTaskConfiguration.index)
+
+    @Provides
+    fun provideWordCountTextProcessor(): WordCounterTextProcessor =
+        WordCounterTextProcessorImpl()
 
     @Provides
     fun provideMainPageConfiguration(): LoadConfiguration {

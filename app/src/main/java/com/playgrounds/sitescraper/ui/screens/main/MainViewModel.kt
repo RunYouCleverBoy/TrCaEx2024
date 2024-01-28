@@ -32,14 +32,16 @@ class MainViewModel @Inject constructor(
             htmlRepository.stateFlow.collect { model ->
                 _stateFlow.update { state ->
                     state.copy(
-                        charOfInterest = model.singleChar,
+                        charOfInterest = model.singleChar?.toString(),
                         charsOfPeriodicInterest = model.periodicChar.joinToString(" ") {
-                            it.replace(
-                                "\n",
-                                "⏎"
-                            )
+                            when (it) {
+                                '\n' -> "⏎"
+                                ' ' -> "␣"
+                                '\t' -> "⇥"
+                                else -> it.toString()
+                            }
                         },
-                        splitWords = model.wordSplitter.map { (prefix, body, suffix) -> "$prefix $body $suffix" }
+                        wordsCount = model.wordsCount?.toString()
                     )
                 }
             }
@@ -55,10 +57,14 @@ class MainViewModel @Inject constructor(
     private fun onReloadPressed() {
         _stateFlow.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            val loadJobs = htmlRepository.getLoadJobs(loadConfiguration)
-            val jobs = loadJobs.map { loadJob ->
+            val loadJobs = listOf(
+                HtmlRepository.LoadJobType.SINGLE_CHAR to loadConfiguration.singleTaskConfiguration.url,
+                HtmlRepository.LoadJobType.PERIODIC_CHAR to loadConfiguration.periodicTaskConfiguration.url,
+                HtmlRepository.LoadJobType.WORD_COUNT to loadConfiguration.wordSplitTaskConfiguration.url
+            )
+            val jobs = loadJobs.map { (type, url) ->
                 launch(Dispatchers.IO + errorHandler) {
-                    htmlRepository.refresh(loadJob)
+                    htmlRepository.refresh(type, url)
                 }
             }
             jobs.joinAll()

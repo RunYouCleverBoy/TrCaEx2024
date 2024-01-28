@@ -1,13 +1,11 @@
 package com.playgrounds.sitescraper.ui.screens.main
 
 import com.playgrounds.sitescraper.models.LoadConfiguration
-import com.playgrounds.sitescraper.models.MatchedParagraph
 import com.playgrounds.sitescraper.models.TaskConfiguration
 import com.playgrounds.sitescraper.repos.HtmlRepositoryImpl
 import com.playgrounds.sitescraper.repos.processors.PeriodicCharTextProcessorImpl
 import com.playgrounds.sitescraper.repos.processors.SingleCharTextProcessorImpl
-import com.playgrounds.sitescraper.repos.processors.TextProcessors
-import com.playgrounds.sitescraper.repos.processors.WordSplitterTextProcessorImpl
+import com.playgrounds.sitescraper.repos.processors.WordCounterTextProcessorImpl
 import com.playgrounds.sitescraper.repos.providers.PageProvider
 import com.playgrounds.sitescraper.ui.screens.main.models.MainEvent
 import com.playgrounds.sitescraper.ui.screens.main.models.MainState
@@ -15,24 +13,22 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
 class MainViewModelTest {
-    private val matchedParagraph = MatchedParagraph("<p>", "Body", "</p>")
+    private val paragraph = "<html><body><p>Body of proof</p></body></html>"
     private lateinit var viewModel: MainViewModel
 
     @Before
     fun setUp() {
         viewModel = MainViewModel(
             htmlRepository = HtmlRepositoryImpl(
-                MockPageProvider(matchedParagraph), TextProcessors(
-                    SingleCharTextProcessorImpl(4),
-                    PeriodicCharTextProcessorImpl(2),
-                    WordSplitterTextProcessorImpl()
-                )
+                MockPageProvider(paragraph),
+                SingleCharTextProcessorImpl(4),
+                PeriodicCharTextProcessorImpl(2),
+                WordCounterTextProcessorImpl()
             ),
             loadConfiguration = LoadConfiguration(
                 singleTaskConfiguration = TaskConfiguration.SingleCharTask("url1", 0),
@@ -47,28 +43,27 @@ class MainViewModelTest {
         runTest {
             val result = CompletableDeferred<MainState>()
             launch {
-                viewModel.stateFlow.collect {
-                    if (it.charOfInterest.isNotBlank()) {
-                        result.complete(it)
+                viewModel.stateFlow.collect { mainState ->
+                    if (mainState.allFieldsArePopulated()) {
+                        result.complete(mainState)
                         this.cancel()
                     }
                 }
             }
             viewModel.dispatchEvent(MainEvent.ReloadPressed)
             val state = result.await()
-            assertEquals("B", state.charOfInterest)
-            assertArrayEquals(
-                arrayOf("${ matchedParagraph.tag } ${ matchedParagraph.text } ${ matchedParagraph.suffix }"), state.splitWords.toTypedArray()
-            )
+            assertEquals("y", state.charOfInterest)
+            assertEquals("5", state.wordsCount ?: 0)
         }
     }
 
+    private fun MainState.allFieldsArePopulated() =
+        charOfInterest != null && charsOfPeriodicInterest != null && wordsCount != null
 
-    private class MockPageProvider(val paragraph: MatchedParagraph) : PageProvider {
+    private class MockPageProvider(val paragraph: String) : PageProvider {
         override suspend fun getPage(url: String): Result<String> {
-            return Result.success("<html><body>A${paragraph.toHtml}</body></html>")
+            return Result.success("<html><body>A$paragraph</body></html>")
         }
-        private val MatchedParagraph.toHtml get() = "$tag$text$suffix"
     }
 }
 

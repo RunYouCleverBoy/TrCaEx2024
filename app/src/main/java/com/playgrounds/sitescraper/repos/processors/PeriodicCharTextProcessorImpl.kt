@@ -1,10 +1,10 @@
 package com.playgrounds.sitescraper.repos.processors
 
-interface PeriodicCharTextProcessor : TextProcessor<String>
+interface PeriodicCharTextProcessor : TextProcessor<List<Char>>
 class PeriodicCharTextProcessorImpl(private val period: Int) : PeriodicCharTextProcessor {
-    override fun processText(text: String): List<String> {
+    override fun processText(text: String): List<Char> {
         val filtered = HtmlParser().filterTheParagraphs(text, "\n")
         val range = (period - 1)..filtered.lastIndex step period
-        return range.map { text[it].toString() }
+        return range.map { filtered[it] }
     }
 }
