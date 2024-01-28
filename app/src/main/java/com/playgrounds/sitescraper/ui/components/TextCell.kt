@@ -1,5 +1,6 @@
 package com.playgrounds.sitescraper.ui.components
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
@@ -13,7 +14,7 @@ fun TextCell(title: String, fieldText: String, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth(),
     ) {
         FieldTitle(title)
-        Text(text = fieldText)
+        Text(text = fieldText, modifier = Modifier.fillMaxWidth().animateContentSize())
     }
 }
 
