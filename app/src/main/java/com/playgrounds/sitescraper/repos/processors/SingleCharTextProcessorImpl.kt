@@ -1,6 +1,5 @@
 package com.playgrounds.sitescraper.repos.processors
 
-interface SingleCharTextProcessor : TextProcessor<Char?>
 class SingleCharTextProcessorImpl(private val atPosition: Int) : SingleCharTextProcessor {
     override fun processText(text: String): Char? {
         val filtered = HtmlParser().filterTheParagraphs(text, "")

@@ -57,6 +57,7 @@ class MainViewModel @Inject constructor(
     private fun onReloadPressed() {
         _stateFlow.update { it.copy(isLoading = true) }
         viewModelScope.launch {
+            htmlRepository.clearState()
             val loadJobs = listOf(
                 HtmlRepository.LoadJobType.SINGLE_CHAR to loadConfiguration.singleTaskConfiguration.url,
                 HtmlRepository.LoadJobType.PERIODIC_CHAR to loadConfiguration.periodicTaskConfiguration.url,

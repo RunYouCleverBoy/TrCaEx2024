@@ -1,5 +1,6 @@
 package com.playgrounds.sitescraper.repos
 
+import com.playgrounds.sitescraper.models.ResultsModel
 import com.playgrounds.sitescraper.repos.processors.PeriodicCharTextProcessor
 import com.playgrounds.sitescraper.repos.processors.SingleCharTextProcessor
 import com.playgrounds.sitescraper.repos.processors.WordCounterTextProcessor
@@ -14,7 +15,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(RobolectricTestRunner::class)
-class HtmlRepositoryTest() {
+class HtmlRepositoryTest {
     private val provider: MockPageProvider = MockPageProvider()
     private val mockSingleTextProcessor = MockSingleTextProcessor(1)
 
@@ -50,6 +51,14 @@ class HtmlRepositoryTest() {
                 mockWordCounterProcessor.processText(provider.text),
                 htmlRepository.refresh(HtmlRepository.LoadJobType.WORD_COUNT, dummyUrl).getOrThrow()
             )
+        }
+    }
+
+    @Test
+    fun clearState() {
+        runTest {
+            htmlRepository.clearState()
+            assertEquals(ResultsModel(), htmlRepository.stateFlow.value)
         }
     }
 
