@@ -2,9 +2,6 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="MainViewModelTest">
-        <State />
-      </entry>
       <entry key="Tests in 'com.playgrounds.sitescraper'">
         <State />
       </entry>
@@ -23,6 +20,9 @@
           </targetSelectedWithDropDown>
           <timeTargetWasSelectedWithDropDown value="2024-01-26T16:28:11.428813Z" />
         </State>
+      </entry>
+      <entry key="parallelismCheck()">
+        <State />
       </entry>
     </value>
   </component>
